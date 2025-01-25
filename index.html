@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <link rel="icon" type="image/x-icon" href="logo.png">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta name="description" content="Kalkulator HPP gratis untuk menghitung harga pokok produksi + tentukan harga jual dengan target margin.">
+   <meta name="author" content="Simbah Research">
+   <title>Kalkulator HPP | Simbah Research</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+   <style>
+   * {
+       margin: 0;
+       padding: 0;
+       box-sizing: border-box;
+       font-family: 'Segoe UI', Arial, sans-serif;
+   }
+
+   body {
+       background: #1a1b1f;
+       color: #fff;
+       line-height: 1.6;
+   }
+
+   .container {
+       max-width: 1200px;
+       margin: 20px auto;
+       padding: 20px;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 10px;
+       border: 1px solid rgba(255, 255, 255, 0.2);
+   }
+
+   .header {
+       text-align: center;
+       margin-bottom: 30px;
+       padding: 20px;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 10px;
+   }
+
+   .header h1 {
+       color: #fff;
+       font-size: 2em;
+       margin-bottom: 10px;
+   }
+
+   .subtitle {
+       color: rgba(255, 255, 255, 0.8);
+   }
+
+   .content {
+       background: rgba(255, 255, 255, 0.1);
+       padding: 30px;
+       border-radius: 10px;
+   }
+
+   .ingredients-section,
+   .additional-costs-section {
+       margin-bottom: 30px;
+       padding: 20px;
+       background: rgba(255, 255, 255, 0.05);
+       border-radius: 8px;
+   }
+
+   h2 {
+       color: #fff;
+       margin-bottom: 20px;
+       padding-bottom: 10px;
+       border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+   }
+
+   .product-info-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+   .form-group {
+       margin-bottom: 15px;
+   }
+
+   .form-group label {
+       display: block;
+       margin-bottom: 5px;
+       color: rgba(255, 255, 255, 0.9);
+   }
+
+   input[type="text"],
+   input[type="number"],
+   select {
+       width: 100%;
+       padding: 10px;
+       background: rgba(255, 255, 255, 0.05);
+       border: 1px solid rgba(255, 255, 255, 0.2);
+       border-radius: 5px;
+       color: #fff;
+   }
+
+   .ingredient-row {
+       display: grid;
+       grid-template-columns: 3fr 2fr 1.5fr 40px;
+       gap: 10px;
+       align-items: center;
+       margin-bottom: 10px;
+       padding: 10px;
+       background: rgba(255, 255, 255, 0.05);
+       border-radius: 5px;
+   }
+
+   .add-btn,
+   .calculate-btn,
+   .download-btn {
+       padding: 10px 20px;
+       border: none;
+       border-radius: 5px;
+       cursor: pointer;
+       display: inline-flex;
+       align-items: center;
+       gap: 8px;
+       color: #fff;
+   }
+
+   .add-btn {
+       background: #3498db;
+       margin-top: 10px;
+   }
+
+   .delete-btn {
+       background: #e74c3c;
+       color: white;
+       border: none;
+       border-radius: 5px;
+       width: 40px;
+       height: 40px;
+       cursor: pointer;
+   }
+
+   .results-container {
+       background: rgba(255, 255, 255, 0.05);
+       padding: 20px;
+       border-radius: 8px;
+       margin-top: 20px;
+   }
+
+   .result-item {
+       display: flex;
+       justify-content: space-between;
+       margin-bottom: 10px;
+       padding: 10px;
+       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+   }
+
+   .result-item.highlighted {
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 5px;
+       font-weight: bold;
+   }
+
+   .action-buttons {
+       display: flex;
+       gap: 15px;
+       justify-content: center;
+       margin-top: 30px;
+   }
+
+   .calculate-btn {
+       background: #2ecc71;
+   }
+
+   .download-btn {
+       background: #9b59b6;
+   }
+
+   .footer {
+       padding: 2rem 0;
+       background: rgba(255, 255, 255, 0.1);
+       margin-top: 3rem;
+       text-align: center;
+       border-top: 1px solid rgba(255, 255, 255, 0.2);
+   }
+
+   .footer-content {
+       max-width: 1200px;
+       margin: 0 auto;
+       padding: 0 1rem;
+   }
+
+   .footer-desc {
+       font-size: 1.1rem;
+       color: rgba(255, 255, 255, 0.8);
+       margin-bottom: 1.5rem;
+   }
+
+   .social-links {
+       display: flex;
+       justify-content: center;
+       gap: 2rem;
+       margin-bottom: 1.5rem;
+   }
+
+   .social-links a {
+       color: rgba(255, 255, 255, 0.8);
+       font-size: 1.5rem;
+       transition: color 0.3s ease;
+   }
+
+   .copyright {
+       color: rgba(255, 255, 255, 0.6);
+       font-size: 0.9rem;
+   }
+
+   .copyright a {
+       color: rgba(255, 255, 255, 0.6);
+       text-decoration: none;
+   }
+
+   @media (max-width: 768px) {
+       .container {
+           margin: 10px;
+           padding: 10px;
+       }
+
+       .ingredient-row {
+           grid-template-columns: 1fr;
+       }
+
+       .action-buttons {
+           flex-direction: column;
+       }
+
+       .calculate-btn,
+       .download-btn {
+           width: 100%;
+       }
+   }
+   /*Logo*/
+.panel-header {
+        position: relative;
+        background: var(--primary-color);
+        color: white;
+        padding: 1.5rem;
+        text-align: center;
+        }
+        .panel-logo {
+        margin-bottom: 1rem;
+        }
+        .panel-logo img {
+        max-width: 100px;
+        height: auto;
+        }
+        .panel-version {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        }
+        .panel-header h2 {
+        margin-bottom: 0.5rem;
+        }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="header">
+        <div class="panel-logo">
+            <a href="https://simbahresearch.my.id/">
+                <img src="logo.png" alt="Logo">
+            </a>
+        </div>
+           <h1>Kalkulator HPP | Simbah Research</h1>
+           <p class="subtitle">Kalkulator Harga Pokok Produksi + Tentukan Target Margin</p>
+       </div>
+       <div class="product-info-section">
+        <h2>Informasi Produk</h2>
+        <div class="form-group">
+            <label>Nama Produk:</label>
+            <input type="text" id="product-name" placeholder="Masukkan nama produk">
+        </div>
+    </div>
+
+       <div class="content">
+           <div class="ingredients-section">
+               <h2>Daftar Bahan-bahan</h2>
+               <div id="ingredients-list"></div>
+               <button class="add-btn" onclick="addIngredient()">
+                   <i class="fas fa-plus"></i> Tambah Bahan
+               </button>
+           </div>
+
+           <div class="additional-costs-section">
+               <h2>Biaya Tambahan</h2>
+               <div class="form-group">
+                   <label>Biaya Overhead:</label>
+                   <input type="text" id="overhead-cost" placeholder="Masukkan biaya overhead" onkeyup="formatCurrency(this)">
+               </div>
+               <div class="form-group">
+                   <label>Target Margin (%):</label>
+                   <input type="number" id="target-margin" placeholder="Contoh: 30" min="0" max="100">
+               </div>
+           </div>
+
+           <div class="results-container">
+               <div class="result-item">
+                   <span>Total Biaya Bahan:</span>
+                   <span id="total-ingredients-cost">Rp 0</span>
+               </div>
+               <div class="result-item">
+                   <span>Total HPP:</span>
+                   <span id="total-hpp">Rp 0</span>
+               </div>
+               <div class="result-item highlighted">
+                   <span>Harga Jual yang Disarankan:</span>
+                   <span id="suggested-price">Rp 0</span>
+               </div>
+           </div>
+
+           <div class="action-buttons">
+               <button class="calculate-btn" onclick="calculateAll()">
+                   <i class="fas fa-calculator"></i> Hitung
+               </button>
+               <button class="download-btn" onclick="generatePDF()">
+                   <i class="fas fa-download"></i> Download PDF
+               </button>
+           </div>
+       </div>
+   </div>
+
+   <footer class="footer">
+       <div class="footer-content">
+           <p class="footer-desc">Kalkulator HPP by Simbah Research</p>
+           <div class="social-links">
+            <a href="https://www.instagram.com/ihfan_sholih" target="_blank" aria-label="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://youtube.com/@simbahresearch?si=FzXEb8dBF5WCf9GD" target="_blank" aria-label="YouTube">
+                <i class="fab fa-youtube"></i>
+            </a>
+            <a href="https://www.facebook.com/share/19VHrsG2ou/?mibextid=JRoKGi" target="_blank" aria-label="Facebook">
+                <i class="fab fa-facebook"></i>
+            </a>
+            <a href="https://www.tiktok.com/@simbah_research?_t=8rQs4AaMY4n&_r=1" target="_blank" aria-label="TikTok">
+                <i class="fab fa-tiktok"></i>
+            </a>
+        </div>
+           <p class="copyright">
+               © 2025 <a href="https://simbahresearch.my.id/">Simbah Research</a>. All rights reserved.
+           </p>
+       </div>
+   </footer>
+
+   <script>
+   // Add ingredient row
+   function addIngredient() {
+       const container = document.getElementById('ingredients-list');
+       const newRow = document.createElement('div');
+       newRow.className = 'ingredient-row';
+       newRow.innerHTML = `
+           <input type="text" class="ingredient-name" placeholder="Nama Bahan">
+           <input type="text" class="ingredient-price" placeholder="Harga Satuan" onkeyup="formatCurrency(this)">
+           <input type="number" class="ingredient-quantity" placeholder="Jumlah" min="0">
+           <button class="delete-btn" onclick="this.parentElement.remove()">
+               <i class="fas fa-trash"></i>
+           </button>
+       `;
+       container.appendChild(newRow);
+   }
+
+   // Format currency
+   function formatCurrency(input) {
+       let value = input.value.replace(/[^\d]/g, '');
+       if (value !== '') {
+           value = parseInt(value).toLocaleString('id-ID');
+           input.value = `Rp ${value}`;
+       }
+   }
+
+   // Parse currency string to number
+   function parseCurrency(str) {
+       return parseInt(str.replace(/[^\d]/g, '')) || 0;
+   }
+
+   // Calculate all costs
+   function calculateAll() {
+       let totalIngredientsCost = 0;
+
+       // Calculate ingredients cost
+       document.querySelectorAll('.ingredient-row').forEach(row => {
+           const price = parseCurrency(row.querySelector('.ingredient-price').value);
+           const quantity = parseFloat(row.querySelector('.ingredient-quantity').value) || 0;
+           totalIngredientsCost += price * quantity;
+       });
+
+       // Get overhead and calculate HPP
+       const overheadCost = parseCurrency(document.getElementById('overhead-cost').value);
+       const totalHPP = totalIngredientsCost + overheadCost;
+       
+       // Calculate selling price with margin
+       const margin = parseFloat(document.getElementById('target-margin').value) || 0;
+       const sellingPrice = totalHPP * (1 + margin/100);
+
+       // Update UI
+       document.getElementById('total-ingredients-cost').textContent = formatRupiah(totalIngredientsCost);
+       document.getElementById('total-hpp').textContent = formatRupiah(totalHPP);
+       document.getElementById('suggested-price').textContent = formatRupiah(sellingPrice);
+   }
+
+   // Format number to Rupiah
+   function formatRupiah(number) {
+       return new Intl.NumberFormat('id-ID', {
+           style: 'currency',
+           currency: 'IDR',
+           minimumFractionDigits: 0,
+           maximumFractionDigits: 0
+       }).format(number);
+   }
+
+   // Generate PDF
+   // Generate PDF
+function generatePDF() {
+   const { jsPDF } = window.jspdf;
+   const doc = new jsPDF();
+   
+   // Get product name
+   const productName = document.getElementById('product-name').value || 'Produk';
+   
+   // Header
+   doc.setFontSize(16);
+   doc.text('Laporan Kalkulasi HPP', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+   
+   // Product Info
+   doc.setFontSize(12);
+   doc.text(`Nama Produk: ${productName}`, 20, 35);
+   
+   // Ingredients Table
+   const ingredientsData = Array.from(document.querySelectorAll('.ingredient-row'))
+       .map(row => [
+           row.querySelector('.ingredient-name').value,
+           row.querySelector('.ingredient-quantity').value,
+           row.querySelector('.ingredient-price').value
+       ])
+       .filter(row => row[0] && row[1] && row[2]);
+
+   if (ingredientsData.length) {
+       doc.autoTable({
+           startY: 45,
+           head: [['Bahan', 'Jumlah', 'Harga']],
+           body: ingredientsData,
+           theme: 'grid',
+           headStyles: { fillColor: [44, 62, 80] }
+       });
+   }
+
+   // Calculations Table
+   const calculationsData = [
+       ['Total Biaya Bahan', document.getElementById('total-ingredients-cost').textContent],
+       ['Biaya Overhead', document.getElementById('overhead-cost').value],
+       ['Total HPP', document.getElementById('total-hpp').textContent],
+       ['Target Margin', document.getElementById('target-margin').value + '%'],
+       ['Harga Jual yang Disarankan', document.getElementById('suggested-price').textContent]
+   ];
+
+   doc.autoTable({
+       startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : 45,
+       head: [['Detail Biaya Produksi + Target Margin', 'Nilai']],
+       body: calculationsData,
+       theme: 'grid',
+       headStyles: { fillColor: [44, 62, 80] }
+   });
+
+   // Footer
+   const date = new Date().toLocaleDateString('id-ID', {
+       weekday: 'long',
+       year: 'numeric',
+       month: 'long',
+       day: 'numeric'
+   });
+   doc.setFontSize(10);
+   doc.text(`Dibuat pada: ${date}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 20, { align: 'center' });
+   
+   doc.setFont(undefined, 'italic');
+   doc.text('Powered By: Simbah Research', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+
+   doc.save(`HPP_${productName.replace(/\s+/g, '_')}.pdf`);
+}
+// Initialize first ingredient row
+document.addEventListener('DOMContentLoaded', function() {
+       addIngredient();
+   });
+</script>
+</body>
+</html>
